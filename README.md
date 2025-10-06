@@ -61,12 +61,11 @@ Refer to [`docs/plan.md`](docs/plan.md) for the full architecture deep dive, com
 
 ## Project Structure
 
-| Path              | Purpose                                                        |
-| ----------------- | -------------------------------------------------------------- |
-| `docs/plan.md`    | Strategic product/architecture plan and assumptions.           |
-| `docs/tickets.md` | Milestone-aligned backlog with acceptance criteria.            |
-| `docs/tasks.md`   | Actionable TODO checklist with hints and governance notes.     |
-| `.github/`        | GitHub workflow and issue template placeholders (coming soon). |
+| Path            | Purpose                                                                           |
+| --------------- | --------------------------------------------------------------------------------- |
+| `docs/plan.md`  | Strategic product/architecture plan and assumptions.                              |
+| `docs/tasks.md` | Unified execution checklist plus detailed ticket backlog and acceptance criteria. |
+| `.github/`      | GitHub workflow and issue template placeholders (coming soon).                    |
 
 Additional directories (e.g., `cmd/`, `internal/`, `web/`, `deploy/`) will arrive during Milestone M0 as scaffolding work progresses.
 
@@ -154,13 +153,12 @@ Refer to upcoming docs under `docs/testing/` for detailed guidance once the harn
 | **M3 – Advanced Providers & UX**  | Mega connector evaluation, advanced caching, RBAC, UX polish, desktop tray prototype, operations runbooks. | 4 weeks  |
 | **M4 – Hardening & Release**      | Security review, packaging, documentation, performance benchmarks, beta program launch.                    | 3 weeks  |
 
-Detailed acceptance criteria and dependencies are tracked in [`docs/tickets.md`](docs/tickets.md).
+Detailed acceptance criteria and dependencies are tracked in [`docs/tasks.md`](docs/tasks.md#ticket-backlog-detailed-acceptance-criteria).
 
 ## Documentation & Backlog
 
 - 📘 [Strategic Plan](docs/plan.md): Product vision, architecture, KPIs, staffing, governance.
-- 🗂️ [Ticket Backlog](docs/tickets.md): Milestone-aligned backlog with acceptance criteria.
-- ✅ [Execution TODOs](docs/tasks.md): Checkbox checklist with hints/comments for every task.
+- ✅ [Execution TODOs + Ticket Backlog](docs/tasks.md): One consolidated checklist with hints, governance notes, and detailed acceptance criteria.
 
 When scope changes, update the relevant document and log decisions per the governance rules below.
 

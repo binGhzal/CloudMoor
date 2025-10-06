@@ -174,7 +174,7 @@ Date: 2025-10-06
 ### 7.2 Deferred Connectors (post-v1 backlog)
 
 - FTP/SFTP, Backblaze B2, OpenStack Swift, Google Drive, OneDrive, Box, Mega, and pCloud remain strategic targets but are intentionally deferred until after the beta launch.
-- Each deferred connector retains lightweight research notes and acceptance criteria in `docs/tickets.md` so they can be reintroduced when resourcing allows.
+- Each deferred connector retains lightweight research notes and acceptance criteria in the Ticket Backlog section of `docs/tasks.md` so they can be reintroduced when resourcing allows.
 - Device-flow providers (Google Drive, OneDrive, Box, pCloud) will reuse the Dropbox patterns once the shared service proves stable.
 
 ### 7.3 Connector Certification Checklist
