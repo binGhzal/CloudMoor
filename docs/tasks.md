@@ -19,8 +19,8 @@ Date: 2025-10-06
     - _Hint:_ Run `go mod init github.com/binGhzal/cloudmoor` and commit baseline folders (`cmd/`, `internal/`, `pkg/`, `web/`, `deploy/`).
     - _Comment:_ Ensure module path matches release namespace to avoid future import churn.
   - [x] **Action:** Commit `.editorconfig`, `.gitignore`, LICENSE, and placeholder READMEs for each top-level directory.
-      - _Hint:_ Mirror formatting settings from Golang + frontend conventions to reduce lint noise.
-      - _Comment:_ Link README stubs to `plan.md` for traceability.
+    - _Hint:_ Mirror formatting settings from Golang + frontend conventions to reduce lint noise.
+    - _Comment:_ Link README stubs to `plan.md` for traceability.
   - [ ] **Subtask M0.1.2 – Establish contribution standards**
     - _Hint:_ Use existing OSS templates as inspiration for `CONTRIBUTING.md` and issue/PR templates.
     - _Comment:_ Coordinate with Product/UX to include security disclosure contact.
