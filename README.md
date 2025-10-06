@@ -175,7 +175,7 @@ CloudMoor is pre-release, but we welcome early feedback and contributions:
 
 1. Review the roadmap and open tickets to identify work in flight.
 2. Coordinate via issues or discussions before large changes.
-3. Follow the upcoming `CONTRIBUTING.md` (Task M0.1.2) for branching, linting, and testing expectations.
+3. Follow the updated [CONTRIBUTING.md](.github/CONTRIBUTING.md) for branching, linting, and testing expectations.
 4. Reference ticket IDs in commits to maintain plan → task traceability.
 
 > **Note:** Security-sensitive disclosures should go directly to the maintainers (see [Security](#security)).

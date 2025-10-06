@@ -1,0 +1,61 @@
+name: "Security report"
+description: "Report a vulnerability or security concern"
+labels:
+  - security
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Please do not disclose security vulnerabilities publicly.**
+
+        Use this template to coordinate a responsible disclosure. For urgent matters you can also email [security@cloudmoor.dev](mailto:security@cloudmoor.dev) directly.
+  - type: checkboxes
+    id: private
+    attributes:
+      label: Disclosure confirmation
+      options:
+        - label: I acknowledge that this report will remain private until maintainers coordinate disclosure.
+          required: true
+  - type: input
+    id: contact
+    attributes:
+      label: Preferred contact
+      description: How can we reach you for follow-up questions?
+      placeholder: Email, GitHub handle, or other secure channel
+    validations:
+      required: true
+  - type: input
+    id: component
+    attributes:
+      label: Affected component
+      description: e.g. connector, daemon API, CLI, packaging
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Vulnerability details
+      description: Provide a clear description, impact assessment, and severity if known.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce / proof of concept
+      description: Include detailed steps, payloads, or scripts. Attach files privately if necessary.
+    validations:
+      required: false
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Suggested remediation
+      description: Optional ideas for how we might address the issue.
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Link to related advisories, CVEs, or prior research.
+    validations:
+      required: false

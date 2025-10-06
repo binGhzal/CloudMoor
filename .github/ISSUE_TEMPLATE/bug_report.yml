@@ -1,0 +1,68 @@
+name: "Bug report"
+description: "Something in CloudMoor is not working as expected"
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem! Please search existing issues before opening a new one and include as much detail as possible.
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I have searched existing issues and discussions
+          required: true
+        - label: This issue maps to an item or acceptance criteria in `docs/tasks.md`
+          required: false
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: Concise description of the bug.
+      placeholder: e.g. WebDAV mounts fail to reconnect after network drop
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include commands, configuration, and any sample data needed to reproduce the issue.
+      placeholder: |
+        1. Run `cloudmoor mount add ...`
+        2. Restart daemon
+        3. Observe error log
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What you expected to happen.
+      placeholder: Mount should transition back to `Mounted` state within 60 seconds.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior / logs
+      description: Provide error messages, stack traces, or screenshots.
+      render: bash
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS version, CloudMoor version/commit, Go version, any other relevant details.
+      placeholder: macOS 14.5, Go 1.22, commit abc123
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Links to related issues, decision logs, or docs updates that might help.
+    validations:
+      required: false

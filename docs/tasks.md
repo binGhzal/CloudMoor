@@ -21,13 +21,13 @@ Date: 2025-10-06
   - [x] **Action:** Commit `.editorconfig`, `.gitignore`, LICENSE, and placeholder READMEs for each top-level directory.
     - _Hint:_ Mirror formatting settings from Golang + frontend conventions to reduce lint noise.
     - _Comment:_ Link README stubs to `plan.md` for traceability.
-  - [ ] **Subtask M0.1.2 – Establish contribution standards**
+  - [x] **Subtask M0.1.2 – Establish contribution standards**
     - _Hint:_ Use existing OSS templates as inspiration for `CONTRIBUTING.md` and issue/PR templates.
     - _Comment:_ Coordinate with Product/UX to include security disclosure contact.
-    - [ ] **Action:** Publish contribution guide covering branching, linting, testing, and release cadence.
-      - _Hint:_ Reference CI commands verbatim so developers can copy/paste locally.
-      - _Comment:_ Mark required checks for PR merge in GitHub settings after document merges.
-    - [ ] **Action:** Add GitHub issue templates (bug, feature, security) and PR checklist.
+  - [x] **Action:** Publish contribution guide covering branching, linting, testing, and release cadence.
+    - _Hint:_ Reference CI commands verbatim so developers can copy/paste locally.
+    - _Comment:_ Mark required checks for PR merge in GitHub settings after document merges.
+  - [x] **Action:** Add GitHub issue templates (bug, feature, security) and PR checklist.
   - _Hint:_ Reuse acceptance criteria boilerplate from the Ticket Backlog section below to stay consistent.
     - _Comment:_ Set default labels (e.g., `needs-triage`) to streamline intake.
   - [x] **Subtask M0.1.3 – Capture engineering standards**
