@@ -4,6 +4,9 @@ _Unified remote storage mounting across every platform._
 
 > **Project status:** Pre-alpha (Milestone M0 in progress). Expect active development and frequent changes.
 
+[![Lint](https://github.com/binGhzal/CloudMoor/actions/workflows/lint.yml/badge.svg)](https://github.com/binGhzal/CloudMoor/actions/workflows/lint.yml)
+[![Test](https://github.com/binGhzal/CloudMoor/actions/workflows/test.yml/badge.svg)](https://github.com/binGhzal/CloudMoor/actions/workflows/test.yml)
+
 ## Table of Contents
 
 - [CloudMoor](#cloudmoor)
@@ -15,10 +18,11 @@ _Unified remote storage mounting across every platform._
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Clone the Repository](#clone-the-repository)
-    - [Bootstrap Tooling (upcoming in M0)](#bootstrap-tooling-upcoming-in-m0)
+  - [Bootstrap Tooling (ongoing in M0)](#bootstrap-tooling-ongoing-in-m0)
+  - [Lint & Test Locally](#lint--test-locally)
     - [Running the Daemon \& CLI (planned)](#running-the-daemon--cli-planned)
     - [Web UI Development (planned)](#web-ui-development-planned)
-    - [Running Tests (planned)](#running-tests-planned)
+  - [Running Tests](#running-tests)
   - [Operational Workflows](#operational-workflows)
   - [Roadmap](#roadmap)
   - [Documentation \& Backlog](#documentation--backlog)
@@ -93,7 +97,7 @@ git clone https://github.com/binGhzal/CloudMoor.git
 cd CloudMoor
 ```
 
-### Bootstrap Tooling (upcoming in M0)
+### Bootstrap Tooling (ongoing in M0)
 
 Once `Task M0.1` completes, the repository will include:
 
@@ -102,6 +106,21 @@ Once `Task M0.1` completes, the repository will include:
 - Pre-commit hooks for formatting and linting.
 
 Until then, keep an eye on the checkbox progress in [`docs/tasks.md`](docs/tasks.md).
+
+### Lint & Test Locally
+
+These commands mirror the GitHub Actions workflows and should be run before opening a pull request:
+
+```bash
+# Repo root
+gofmt -w $(go list -f '{{.Dir}}' ./...)
+gofumpt -w ./...
+go vet ./...
+golangci-lint run
+go test ./...
+```
+
+Frontend-specific commands still live under `web/` (`npm run lint`, `npm test`).
 
 ### Running the Daemon & CLI (planned)
 
@@ -130,17 +149,13 @@ npm run dev
 
 The daemon will proxy Web UI assets in production, while `npm run dev` provides a Vite-powered local workflow.
 
-### Running Tests (planned)
+### Running Tests
 
 ```bash
-# Unit tests
-make test
-
-# Integration tests (spins up MinIO (S3) and WebDAV containers)
-make test-integration
+go test ./...
 ```
 
-Refer to upcoming docs under `docs/testing/` for detailed guidance once the harness is in place (Task M1.5).
+Additional integration harnesses will arrive in Milestone M1; keep an eye on `docs/tasks.md` task M1.5 for progress updates.
 
 ## Operational Workflows
 

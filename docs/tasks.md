@@ -40,24 +40,24 @@ Date: 2025-10-06
 - [ ] **Task M0.2 – CI/CD Skeleton & Quality Gates** _(Tickets: TCK-002)_
   - _Hint:_ Implement workflows incrementally—start with lint/test, then add build matrix.
   - _Comment:_ Align pipeline steps with governance quality gates (lint, unit tests, security scan).
-  - [ ] **Subtask M0.2.1 – Configure GitHub Actions pipeline**
+  - [x] **Subtask M0.2.1 – Configure GitHub Actions pipeline**
     - _Hint:_ Base workflow on official Go + golangci-lint reusable actions.
     - _Comment:_ Use Go 1.22 and 1.21 to cover current + previous stable releases.
-    - [ ] **Action:** Add job running gofmt, govet, and golangci-lint on pull requests.
-      - _Hint:_ Fail fast on formatting errors to encourage pre-commit hooks.
-      - _Comment:_ Document command invocation in contributing guide.
-    - [ ] **Action:** Add test job executing `go test ./...` across OS matrix (linux, macos, windows).
-      - _Hint:_ Use `actions/cache` to speed up module downloads.
-      - _Comment:_ Gate merge on this job succeeding.
-  - [ ] **Subtask M0.2.2 – Expose pipeline status**
+  - [x] **Action:** Add job running gofmt, govet, and golangci-lint on pull requests.
+    - _Hint:_ Fail fast on formatting errors to encourage pre-commit hooks.
+    - _Comment:_ Document command invocation in contributing guide.
+  - [x] **Action:** Add test job executing `go test ./...` across OS matrix (linux, macos, windows).
+    - _Hint:_ Use `actions/cache` to speed up module downloads.
+    - _Comment:_ Gate merge on this job succeeding.
+  - [x] **Subtask M0.2.2 – Expose pipeline status**
     - _Hint:_ Embed status badges in `README.md` once workflow names are finalized.
     - _Comment:_ Provide troubleshooting steps for common CI failures.
-    - [ ] **Action:** Update README with lint/test badge markdown.
-      - _Hint:_ Use shields.io badge URLs tied to workflow file name.
-      - _Comment:_ Keep badge section above fold for quick visibility.
-    - [ ] **Action:** Document local lint/test workflow mirroring CI steps.
-      - _Hint:_ Add `make lint` / `make test` commands to support automation.
-      - _Comment:_ Ensure docs mention required tool versions (golangci-lint, npm, etc.).
+  - [x] **Action:** Update README with lint/test badge markdown.
+    - _Hint:_ Use shields.io badge URLs tied to workflow file name.
+    - _Comment:_ Keep badge section above fold for quick visibility.
+  - [x] **Action:** Document local lint/test workflow mirroring CI steps.
+    - _Hint:_ Add `make lint` / `make test` commands to support automation.
+    - _Comment:_ Ensure docs mention required tool versions (golangci-lint, npm, etc.).
 
 - [ ] **Task M0.3 – Core Domain Abstractions** _(Tickets: TCK-003, TCK-004, TCK-005)_
   - _Hint:_ Design interfaces and persistence schema together to avoid churn.

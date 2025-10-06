@@ -47,12 +47,13 @@ npm install
 
 ## Formatting, Linting & Tests
 
-Until automated Make targets land, run the following commands locally before opening a pull request:
+Until automated Make targets land, run the following commands locally before opening a pull request. These mirror the GitHub Actions lint and test workflows.
 
 ```bash
 # From repo root
 gofmt -w $(go list -f '{{.Dir}}' ./...)
 gofumpt -w ./...
+go vet ./...
 golangci-lint run
 go test ./...
 
