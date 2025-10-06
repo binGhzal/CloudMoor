@@ -325,6 +325,7 @@ Date: 2025-10-06
 - **API references:** Auto-generate from protobuf definitions using `buf` or `grpc-gateway` swagger.
 - **Examples:** Recipes for common mounts (e.g., MinIO in Kubernetes, S3 cross-account).
 - **Contribution guide:** Coding standards, branching, testing requirements.
+- **Engineering standards:** Consolidated in `docs/spec.md`; update alongside plan/task changes to keep conventions authoritative.
 - Provide quickstart templates (Docker Compose, Terraform sample) and CLI cheat sheet.
 
 ### 13.1 Developer Tooling

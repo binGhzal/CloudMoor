@@ -30,6 +30,12 @@ Date: 2025-10-06
     - [ ] **Action:** Add GitHub issue templates (bug, feature, security) and PR checklist.
   - _Hint:_ Reuse acceptance criteria boilerplate from the Ticket Backlog section below to stay consistent.
     - _Comment:_ Set default labels (e.g., `needs-triage`) to streamline intake.
+  - [x] **Subtask M0.1.3 – Capture engineering standards**
+    - _Hint:_ Synthesize best-practice research into `docs/spec.md` covering Go, React, testing, and tooling conventions.
+    - _Comment:_ Keep the spec aligned with `docs/plan.md` §13 and refresh alongside milestone updates.
+    - [x] **Action:** Publish `docs/spec.md` and reference it from README, plan, and tasks.
+      - _Hint:_ Link spec wherever contributors look for process guidance to minimise drift.
+      - _Comment:_ Update action items here whenever standards evolve materially.
 
 - [ ] **Task M0.2 – CI/CD Skeleton & Quality Gates** _(Tickets: TCK-002)_
   - _Hint:_ Implement workflows incrementally—start with lint/test, then add build matrix.

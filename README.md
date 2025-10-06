@@ -159,6 +159,7 @@ Detailed acceptance criteria and dependencies are tracked in [`docs/tasks.md`](d
 
 - 📘 [Strategic Plan](docs/plan.md): Product vision, architecture, KPIs, staffing, governance.
 - ✅ [Execution TODOs + Ticket Backlog](docs/tasks.md): One consolidated checklist with hints, governance notes, and detailed acceptance criteria.
+- 🧭 [Engineering Standards](docs/spec.md): Repository layout, coding conventions, testing strategy, and automation expectations.
 
 When scope changes, update the relevant document and log decisions per the governance rules below.
 
