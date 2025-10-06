@@ -436,3 +436,11 @@ Date: 2025-10-06
 - Determine minimal desktop OS versions supported (Windows 10+, macOS 12+, Ubuntu 22.04 LTS?).
 - Confirm need for HIPAA/PCI compliance in early releases.
 - Evaluate demand for multi-factor authentication in Web UI for v1.0 or post-launch.
+
+## 21. Delivery Governance & Tracking
+
+- **Milestone exit reviews:** Each milestone (M0–M4) must pass a formal review covering scope completion, outstanding defects, security checklist, and documentation updates before progression.
+- **Weekly steering sync:** Cross-functional leads meet weekly to review burn-down charts, risk register updates, and unblock critical dependencies.
+- **Change control:** Material roadmap or scope adjustments require a written RFC reviewed by engineering, product, and security owners; accepted changes are reflected in both `plan.md` and `tasks.md` within 24 hours.
+- **Quality gates:** No feature advances to the next environment without passing automated lint/test suites, integration smoke tests, and relevant security scanning jobs captured in CI pipelines.
+- **Traceability:** Each task in `tasks.md` references its originating ticket identifier to ensure traceable linkage from strategic plan → backlog → execution. Deviations are logged in a lightweight decision log stored under `/docs/decisions/`.
