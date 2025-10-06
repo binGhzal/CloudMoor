@@ -68,21 +68,45 @@ Date: 2025-10-06
     - [ ] **Action:** Implement connector registry loader with unit tests ensuring deterministic ordering.
       - _Hint:_ Use build tags or plugin metadata structs for compile-time registration.
       - _Comment:_ Store registry manifest in JSON to support Web UI discovery.
+      - _Plan:_
+        - Define `internal/connectors` package with `Connector` interface (`Init`, `ValidateConfig`, `Open`, `Close`) plus supporting types for provider metadata and mount context.
+        - Implement a registry that registers providers via `func RegisterProvider(desc ProviderDescriptor)` and preserves deterministic ordering via slice of keys + map for lookups.
+        - Generate JSON manifest from registry entries (for future Web UI) and expose helper to return stable, alphabetized list.
+        - Author table-driven unit tests that register fake providers, assert deterministic ordering, and guard against duplicate IDs.
+        - Add doc comments/Godoc examples so downstream teams understand interface expectations.
   - [ ] **Subtask M0.3.2 – Implement credential vault MVP**
     - _Hint:_ Leverage `crypto/aes` with envelope encryption and rotate master key via CLI.
     - _Comment:_ Provide secret abstraction that can swap to external stores later.
     - [ ] **Action:** Add CRUD API and CLI command `cloudmoor config vault test` with unit coverage.
       - _Hint:_ Mock key ring during tests to avoid persisting secrets on disk.
       - _Comment:_ Emit structured audit logs on secret access.
+      - _Plan:_
+        - Create `internal/vault` package exposing `Store` interface with methods for `Put`, `Get`, `Delete`, `List`, and `HealthCheck` plus structured audit hooks.
+        - Implement AES-GCM envelope encryption using a master key sourced via pluggable `KeyProvider` (initial provider uses filesystem key sealed by user-supplied passphrase or OS keychain stub).
+        - Add in-memory key provider for tests and a file-based provider for the MVP; ensure design allows future external secret stores.
+        - Build CLI command `cloudmoor config vault test` under `cmd/cloudmoor` that exercises round-trip encrypt/decrypt and prints audit info; scaffold logging to use shared zap logger.
+        - Write unit tests covering encryption round trips, key rotation flow, and audit emission using testify and deterministic fixtures.
   - [ ] **Subtask M0.3.3 – Create configuration persistence layer**
     - _Hint:_ Use `golang-migrate` for forward-only migrations and keep schema diagram in docs.
     - _Comment:_ Ensure `mounts` table stores semantic version for change detection.
     - [ ] **Action:** Implement SQLite migrations covering providers, mounts, jobs, audit logs.
       - _Hint:_ Back up DB prior to migration in integration tests.
       - _Comment:_ Validate migrations on macOS/Linux via CI.
+      - _Plan:_
+        - Introduce `internal/storage/sqlite` module housing migration runner (using `golang-migrate` with `embed` for migration files) and repository interfaces for providers, mounts, jobs, and audit entries.
+        - Define initial schema: tables for `providers`, `mounts` (with semantic version + config JSON), `jobs`, `audit_logs`, and `settings`; include indexes for lookups and soft-delete columns for future expansion.
+        - Provide bootstrap migration files `0001_initial.up.sql`/`.down.sql` plus Go helper to apply migrations at daemon startup with idempotent behavior.
+        - Create config struct for database path/cache directories, defaulting to XDG-compliant locations; ensure tests use temp directories.
+        - Add table-driven unit tests using `sqlite` in-memory DB to verify CRUD operations and versioned YAML export/import routines (Round-trip tests).
     - [ ] **Action:** Implement YAML export/import commands with round-trip tests.
       - _Hint:_ Use JSON schema validation before applying imports.
       - _Comment:_ Include version compatibility warnings in CLI output.
+      - _Plan:_
+        - Design serialization structs mirroring DB schema but decoupled from internal entities; include schema version header and metadata (timestamp, CLI version).
+        - Implement exporter in `internal/configio` (or under `internal/storage`) that pulls data via repositories and writes YAML using `gopkg.in/yaml.v3` with deterministic ordering.
+        - Implement importer that validates schema version, runs JSON-schema-based checks, and upserts into repositories within a transaction.
+        - Create CLI commands `cloudmoor config export`/`import` with flags for output path, dry-run, and compatibility warnings; include docs referencing audit trail.
+        - Write round-trip tests using golden fixtures, verifying idempotency and failure cases (unknown version, schema mismatch).
 
 - [ ] **Task M0.4 – API Surface & Service Contracts** _(Tickets: TCK-006, TCK-109)_
   - _Hint:_ Define protobuf schemas before coding server handlers.
