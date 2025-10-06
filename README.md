@@ -30,7 +30,7 @@ _Unified remote storage mounting across every platform._
 
 ## Why CloudMoor?
 
-CloudMoor is a Go-based platform that mounts remote storage providers (S3, Dropbox, pCloud, FTP/SFTP, and more) as native drives on macOS, Linux, and Windows. It builds on the battle-tested rclone ecosystem while adding:
+CloudMoor is a Go-based platform that mounts remote storage providers (S3/MinIO, WebDAV, Dropbox—with a backlog of additional providers) as native drives on macOS, Linux, and Windows. It builds on the battle-tested rclone ecosystem while adding:
 
 - A daemon with resilient reconnects, caching, and observability built in.
 - A CLI for scripting and headless automation.
@@ -39,7 +39,7 @@ CloudMoor is a Go-based platform that mounts remote storage providers (S3, Dropb
 
 ## Key Features
 
-- **Connector ecosystem:** Plugin-style providers covering S3, MinIO, Backblaze B2, WebDAV, Dropbox, Google Drive, OneDrive, Box, pCloud, Mega, FTP/SFTP, and more.
+- **Connector ecosystem:** Launch connectors include S3/MinIO, WebDAV, and Dropbox, with deferred backlog items such as FTP/SFTP, Backblaze B2, Google Drive, OneDrive, Box, pCloud, and more.
 - **Smart caching:** Layered metadata and file caching with offline write-back support.
 - **Security-first design:** AES-GCM credential vault, audit logging, TLS everywhere, RBAC-ready APIs.
 - **Unified APIs:** gRPC core with REST gateway, OpenAPI generation, and CLI/Web UI parity.
@@ -131,7 +131,7 @@ The daemon will proxy Web UI assets in production, while `npm run dev` provides 
 # Unit tests
 make test
 
-# Integration tests (spins up FTP/MinIO/WebDAV containers)
+# Integration tests (spins up MinIO (S3) and WebDAV containers)
 make test-integration
 ```
 
@@ -146,13 +146,13 @@ Refer to upcoming docs under `docs/testing/` for detailed guidance once the harn
 
 ## Roadmap
 
-| Milestone                         | Focus                                                                                                           | Duration |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------- | -------- |
-| **M0 – Foundations**              | Repo scaffold, CI, connector interfaces, credential vault, persistence, proto contracts.                        | 2 weeks  |
-| **M1 – Core Providers & Daemon**  | FTP/SFTP, S3/MinIO, Backblaze, WebDAV connectors; mount manager; CLI workflows; Testcontainers harness.         | 4 weeks  |
-| **M2 – OAuth Providers & Web UI** | Dropbox, Google Drive, OneDrive, Box, pCloud; OAuth device flow; Web UI foundation; observability enhancements. | 4 weeks  |
-| **M3 – Advanced Providers & UX**  | Mega connector, advanced caching, RBAC, UX polish, desktop tray prototype, operations runbooks.                 | 3 weeks  |
-| **M4 – Hardening & Release**      | Security review, packaging, documentation, performance benchmarks, beta program launch.                         | 2 weeks  |
+| Milestone                         | Focus                                                                                                      | Duration |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------- | -------- |
+| **M0 – Foundations**              | Repo scaffold, CI, connector interfaces, credential vault, persistence, proto contracts, librclone spike.  | 3 weeks  |
+| **M1 – Core Providers & Daemon**  | S3/MinIO & WebDAV connectors, mount manager, CLI workflows, Testcontainers harness, daemon runtime.        | 6 weeks  |
+| **M2 – OAuth Providers & Web UI** | Dropbox connector, OAuth device flow service, Web UI foundation, observability enhancements.               | 4 weeks  |
+| **M3 – Advanced Providers & UX**  | Mega connector evaluation, advanced caching, RBAC, UX polish, desktop tray prototype, operations runbooks. | 4 weeks  |
+| **M4 – Hardening & Release**      | Security review, packaging, documentation, performance benchmarks, beta program launch.                    | 3 weeks  |
 
 Detailed acceptance criteria and dependencies are tracked in [`docs/tickets.md`](docs/tickets.md).
 

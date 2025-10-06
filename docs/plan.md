@@ -6,7 +6,7 @@ Date: 2025-10-06
 
 - Provide a unified application that mounts remote storage providers as local drives with persistent configuration across reboots.
 - Support both power users (CLI) and always-on service deployments (headless daemon with optional Web UI), with an extensible path to a desktop GUI client.
-- Deliver a plugin-based connector layer covering the following services at launch: FTP, SFTP, Amazon S3, MinIO, Backblaze B2, OpenStack Swift, Dropbox, Google Drive, OneDrive, Box, Mega, WebDAV, and pCloud.
+- Deliver a plugin-based connector layer launching with Amazon S3/MinIO, WebDAV, and Dropbox, while maintaining a deferred backlog for additional providers.
 - Focus on secure credential management, reliable reconnection on network hiccups, and minimal latency through smart caching.
 - Maintain an architecture that can scale from single-user laptops to multi-tenant server deployments with minimal operational friction.
 
@@ -33,17 +33,6 @@ Date: 2025-10-06
 4. **Future Desktop GUI:**
    - Electron or Tauri app reusing daemon APIs for richer tray controls.
    - Offers OS-native notifications and quick actions.
-
-## 4. High-Level Architecture
-
-- **Core Daemon:** Orchestrates mounts, retries, monitoring. Written in Go, exposing gRPC and REST endpoints.
-- **Connector Plugins:** Thin wrappers around rclone remotes with uniform lifecycle (init, validate, mount, sync, cleanup). Configurable via JSON Schema definitions stored in the database.
-- **Mount Manager:** Abstracts FUSE operations; handles platform-specific adapters (FUSE, WinFsp).
-- **Persistence Layer:** SQLite (via `modernc.org/sqlite` for pure Go) storing profiles, credentials (encrypted), mount states, cache metadata.
-- **Secrets Vault:** Pluggable backends: file-based encrypted keystore (default), with future support for OS keychains, HashiCorp Vault.
-- **API Gateway:** gRPC endpoints (for internal clients) with auto-generated REST gateway for CLI/Web UI integrations.
-- **Task & Event Bus:** Lightweight pub/sub (e.g., `nats.go` embedded JetStream or Go channels) for broadcasting mount events to UI/logging subsystems.
-- **Observability:** Structured logging (Zap), metrics via Prometheus, health endpoints.
 
 ### 4.1 Deployment Topologies
 
@@ -98,24 +87,24 @@ Date: 2025-10-06
 
 - REST gateway follows `/api/v1/...` naming, with OpenAPI spec generated for client SDKs.
 - CLI uses gRPC directly when running on same host, falling back to REST over HTTPS when remote.
-
-## 5. Persistence & State Management
-
-- **Configuration DB:** Stores provider configs, mount definitions, schedules, user roles, and audit logs.
-- **Cache Directory:** Per-mount configurable location with size/TTL policies; optional persistent caching using `rclone` VFS cache.
-- **Snapshotting:** Periodic export of configs to encrypted archive for backup/disaster recovery.
-- **Resume Strategy:** On startup, daemon reads persisted mounts and attempts reconnection respecting backoff policies.
-
-### 5.1 Data Model Overview
-
-| Entity       | Description                                     | Key Fields                                                                         |
-| ------------ | ----------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `providers`  | Registered provider configurations.             | `id`, `type`, `display_name`, `config_json`, `last_validated_at`.                  |
-| `mounts`     | Mount definitions and runtime state.            | `id`, `name`, `provider_id`, `mount_path`, `cache_policy`, `status`, `last_error`. |
-| `secrets`    | Encrypted credential blobs and metadata.        | `id`, `provider_id`, `key_alias`, `created_at`, `rotated_at`.                      |
-| `users`      | Accounts for Web UI / API access.               | `id`, `email`, `role`, `status`, `last_login_at`.                                  |
-| `audit_logs` | Immutable record of actions.                    | `id`, `actor_id`, `action`, `target`, `timestamp`, `metadata`.                     |
-| `jobs`       | Background tasks (sync, cache purge, snapshot). | `id`, `job_type`, `payload`, `schedule`, `status`.                                 |
+  1.  **M0 – Foundations & rclone strategy (3 weeks):**
+      - Bootstrap repo, choose tooling, set up CI/CD (GitHub Actions) and GoReleaser pipeline.
+      - Implement config persistence, credential vault MVP, pluggable connector interface.
+      - Run a comparative spike on embedding `librclone` versus orchestrating the rclone binary over RPC; capture the decision in `/docs/decisions/` (ticket TCK-009).
+  2.  **M1 – Core Mount Experience (6 weeks):**
+      - Ship S3/MinIO and WebDAV connectors with integration tests and cache MVP.
+      - Deliver mount manager, daemon service (gRPC/REST), and CLI workflows for config/mount lifecycle.
+      - Invest in cross-platform build tooling (macOS + Windows runners with MacFUSE/WinFsp) to unblock CGO releases.
+  3.  **M2 – OAuth & Web UI Baseline (4 weeks):**
+      - Harden the shared OAuth device flow service and complete Dropbox connector end-to-end.
+      - Stand up Web UI alpha (config wizard, mount dashboard) and Prometheus/Zap observability improvements.
+      - Close feedback loop on security (vault auditability, token refresh metrics).
+  4.  **M3 – Reliability & Access Controls (4 weeks):**
+      - Extend cache controls, add RBAC + audit logs, and refine Web UI ergonomics.
+      - Prepare packaging (service installers, container image) and operations runbooks for beta.
+      - Reassess deferred connectors based on performance and support signals.
+  5.  **M4 – Beta Hardening & Release Prep (3 weeks):** - Complete security review, performance benchmarks, documentation suite, and beta program launch. - Finalise packaging artefacts, telemetry opt-in, and feedback triage cadence.
+      | `jobs` | Background tasks (sync, cache purge, snapshot). | `id`, `job_type`, `payload`, `schedule`, `status`. |
 
 ### 5.2 Configuration Versioning & Migration
 
@@ -153,70 +142,42 @@ Date: 2025-10-06
 
 ## 7. Provider Integration Strategy
 
-| Provider        | Protocol/SDK                             | Notes                                                                       |
-| --------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
-| FTP/SFTP        | `rclone/backend/sftp`                    | Combine FTP & SFTP connectors, support key-based auth, passive mode.        |
-| Amazon S3       | `rclone/backend/s3`                      | Support multiple credential sources (IAM roles, access keys, web identity). |
-| MinIO           | `rclone/backend/s3` with custom endpoint | Allow custom region/endpoint, TLS settings.                                 |
-| Backblaze B2    | `rclone/backend/b2`                      | Handle application keys; tune upload concurrency.                           |
-| OpenStack Swift | `rclone/backend/swift`                   | Support Keystone v2/v3 auth.                                                |
-| Dropbox         | `rclone/backend/dropbox`                 | OAuth 2.0 flow; refresh tokens stored securely.                             |
-| Google Drive    | `rclone/backend/drive`                   | Service account & OAuth options; file metadata caching.                     |
-| OneDrive        | `rclone/backend/onedrive`                | Support personal and business variants.                                     |
-| Box             | `rclone/backend/box`                     | JWT-based enterprise auth and OAuth for individuals.                        |
-| Mega            | `rclone/backend/mega`                    | Client-side encryption support; watch throttling.                           |
-| WebDAV          | `rclone/backend/webdav`                  | Generic connector; preset profiles (Nextcloud, SharePoint).                 |
-| pCloud          | `rclone/backend/pcloud`                  | OAuth flow; ensure support for custom directories.                          |
+| Provider          | Protocol/SDK                          | Notes                                                                               |
+| ----------------- | ------------------------------------- | ----------------------------------------------------------------------------------- |
+| Amazon S3 / MinIO | `rclone/backend/s3` (custom endpoint) | Launch connector; supports IAM roles, static keys, and S3-compatible endpoints.     |
+| WebDAV            | `rclone/backend/webdav`               | Launch connector; presets for Nextcloud and SharePoint, TLS toggle for self-hosted. |
+| Dropbox           | `rclone/backend/dropbox`              | Launch connector; exercises shared OAuth device flow service and token lifecycle.   |
 
-- Each connector defines validation schema, environment variable defaults, and UI form layout metadata.
-- Provide integration tests per connector using local test containers or mocked APIs where feasible.
+- Each launch connector defines validation schema, environment variable defaults, and UI form layout metadata.
+- Deferred providers remain part of the product vision and are documented in §7.2 for future milestones.
 
-### 7.1 Provider-by-Provider Notes
-
-#### FTP & SFTP
-
-- Credential options: username/password, SSH key with passphrase, SSH agent forwarding.
-- Passive mode support with range-restricted passive ports.
-- Optional chroot enforcement and directory whitelisting.
+### 7.1 Launch Providers (v1 scope)
 
 #### Amazon S3 & MinIO
 
-- IAM role assumption via AWS STS and web identity tokens.
-- Support for S3-compatible endpoints (DigitalOcean Spaces, Wasabi).
-- Advanced features: multipart upload tuning, SSE-KMS key selection, requester-pays buckets.
-
-#### Backblaze B2
-
-- Application key scoping per bucket.
-- Automatic large file resumption, configurable part size.
-- Integrate with B2 lifecycle rules for archival tiers.
-
-#### OpenStack Swift
-
-- Support Keystone v2/v3, application credentials, and temp URLs.
-- Region selection and project scoping via UI.
-- Handle large object segmentation transparently.
-
-#### Dropbox / Google Drive / OneDrive / Box / pCloud
-
-- OAuth device code flow for headless setups; standard auth for Web UI.
-- Token refresh strategy with proactive renewal before expiry.
-- Scopes minimized to read/write for user-selected folders.
-- Handle rate limiting via exponential backoff and incremental sync windows.
-
-#### Mega
-
-- Client-side encryption keys derived from user credentials; store hashed key salt only.
-- Throttle management to avoid account suspension.
-- Monitor proprietary API changes via integration tests.
+- Support IAM role assumption via AWS STS, web identity tokens, and static access keys.
+- Allow custom region/endpoint configuration for MinIO, DigitalOcean Spaces, and other S3-compatible services.
+- Expose sensible defaults for multipart uploads and optional SSE-KMS integration; advanced tuning lands post-GA.
 
 #### WebDAV
 
-- Presets for Nextcloud, SharePoint, ownCloud with pre-filled endpoints.
-- Certificate pinning options for self-hosted instances.
-- WebDAV locking semantics surfaced to users (optimistic/pessimistic).
+- Provide presets for Nextcloud, SharePoint, and ownCloud with pre-filled endpoints and default TLS settings.
+- Offer certificate pinning options for self-hosted instances while surfacing warnings when TLS verification is disabled.
+- Document optimistic vs. pessimistic locking semantics to set user expectations.
 
-### 7.2 Connector Certification Checklist
+#### Dropbox
+
+- Implements the shared OAuth device flow service, including polling cadence, user messaging, and token refresh.
+- Supports scope minimisation, incremental backoff for rate limits, and secure credential storage via the vault.
+- Serves as the reference implementation for future OAuth-centric providers.
+
+### 7.2 Deferred Connectors (post-v1 backlog)
+
+- FTP/SFTP, Backblaze B2, OpenStack Swift, Google Drive, OneDrive, Box, Mega, and pCloud remain strategic targets but are intentionally deferred until after the beta launch.
+- Each deferred connector retains lightweight research notes and acceptance criteria in `docs/tickets.md` so they can be reintroduced when resourcing allows.
+- Device-flow providers (Google Drive, OneDrive, Box, pCloud) will reuse the Dropbox patterns once the shared service proves stable.
+
+### 7.3 Connector Certification Checklist
 
 - Connectivity & auth validation (success/failure).
 - Large file upload/download (>5 GB) throughput measurement.
@@ -258,7 +219,7 @@ Date: 2025-10-06
 
 - WCAG 2.1 AA compliance target for Web UI (color contrast, focus management, ARIA labels).
 - Provide keyboard navigable CLI prompts and optional high-contrast output mode.
-- Localization framework using ICU message format; community translation contributions encouraged post v1.0.
+- Localization framework is deferred until after the beta launch; the initial release ships with English-only UI strings while we gather feedback on terminology and tone.
 
 ## 9. Deployment & Packaging
 
@@ -293,7 +254,7 @@ Date: 2025-10-06
 ### 10.1 Automation Pyramid
 
 - **Unit (70%)**: Pure Go tests, mocks for provider interfaces.
-- **Integration (20%)**: Spin up containers (MinIO, Swift, WebDAV) via Testcontainers-go.
+- **Integration (20%)**: Spin up containers (MinIO, WebDAV) via Testcontainers-go and mock Dropbox OAuth device responses.
 - **E2E (10%)**: CLI-driven scenarios executed in GitHub Actions matrix (macOS, Linux, Windows).
 
 ### 10.2 Test Environments
@@ -312,33 +273,35 @@ Date: 2025-10-06
 
 ## 11. Roadmap & Milestones
 
-1. **M0 - Foundations (2 weeks):**
-   - Bootstrap repo, choose tooling, set up CI/CD (GitHub Actions) and goreleaser pipeline.
-   - Implement config persistence, credential vault, pluggable connector interface.
-2. **M1 - Core Providers (4 weeks):**
-   - FTP/SFTP, S3/MinIO, Backblaze, WebDAV connectors.
-   - CLI workflows for config/mount, daemon service with gRPC/REST API.
-   - Basic caching and reconnection logic.
-3. **M2 - OAuth-heavy Providers (4 weeks):**
-   - Dropbox, Google Drive, OneDrive, Box, pCloud connectors with OAuth device flow.
-   - Web UI for configuration and monitoring.
-   - Metrics and logging enhancements.
-4. **M3 - Advanced Providers & UX (3 weeks):**
-   - Mega integration, advanced cache policies, mount profiles.
-   - RBAC, multi-user support, audit logs.
-   - Polished Web UI, optional desktop tray prototype.
-5. **M4 - Hardening & Release (2 weeks):**
-   - Security review, packaging, documentation, beta release program.
+1. **M0 – Foundations & rclone strategy (3 weeks):**
+   - Bootstrap repo, choose tooling, set up CI/CD (GitHub Actions) and GoReleaser pipeline.
+   - Implement config persistence, credential vault MVP, pluggable connector interface.
+   - Run a comparative spike on embedding `librclone` versus orchestrating the rclone binary over RPC; capture the decision in `/docs/decisions/` (ticket TCK-009).
+2. **M1 – Core Mount Experience (6 weeks):**
+   - Ship S3/MinIO and WebDAV connectors with integration tests and cache MVP.
+   - Deliver mount manager, daemon service (gRPC/REST), and CLI workflows for config/mount lifecycle.
+   - Invest in cross-platform build tooling (macOS + Windows runners with MacFUSE/WinFsp) to unblock CGO releases.
+3. **M2 – OAuth & Web UI Baseline (4 weeks):**
+   - Harden the shared OAuth device flow service and complete Dropbox connector end-to-end.
+   - Stand up Web UI alpha (config wizard, mount dashboard) and Prometheus/Zap observability improvements.
+   - Close feedback loop on security (vault auditability, token refresh metrics).
+4. **M3 – Reliability & Access Controls (4 weeks):**
+   - Extend cache controls, add RBAC + audit logs, and refine Web UI ergonomics.
+   - Prepare packaging (service installers, container image) and operations runbooks for beta.
+   - Reassess deferred connectors based on performance and support signals.
+5. **M4 – Beta Hardening & Release Prep (3 weeks):**
+   - Complete security review, performance benchmarks, documentation suite, and beta program launch.
+   - Finalise packaging artefacts, telemetry opt-in, and feedback triage cadence.
 
 ### 11.1 Milestone Deliverables
 
-| Milestone | Key Deliverables                                             | Acceptance Criteria                                               |
-| --------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |
-| M0        | Repo scaffolding, CI pipeline, connector interface skeleton. | CI green on lint/test, CLI can list providers.                    |
-| M1        | Core connectors, daemon service, cache MVP.                  | Mount/unmount S3/FTP/WebDAV in integration tests.                 |
-| M2        | OAuth providers, Web UI alpha, metrics.                      | OAuth flows succeed, Web UI shows mount status, metrics exported. |
-| M3        | Mega connector, RBAC, UX polish.                             | Multi-user roles enforced, desktop tray prototype functional.     |
-| M4        | Installers, docs, beta release.                              | Installers verified, docs published, feedback loop in place.      |
+| Milestone | Key Deliverables                                                            | Acceptance Criteria                                                        |
+| --------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| M0        | Repo scaffolding, CI pipeline, connector interface, rclone integration RFC. | CI green on lint/test, documented decision on rclone embedding approach.   |
+| M1        | S3/MinIO + WebDAV connectors, daemon + CLI, cache MVP.                      | Mount/unmount S3 and WebDAV in integration tests across macOS/Linux/Win.   |
+| M2        | OAuth device flow service, Dropbox connector, Web UI alpha, observability.  | Dropbox device flow succeeds, Web UI shows mount status, metrics exported. |
+| M3        | Cache controls, RBAC, packaging groundwork, runbooks.                       | RBAC enforced, cache tuning exposed in CLI/UI, install scripts verified.   |
+| M4        | Security/packaging docs, beta launch readiness.                             | Security review signed off, docs published, beta cohort onboarded.         |
 
 ## 12. Risks & Mitigations
 
@@ -380,6 +343,7 @@ Date: 2025-10-06
 
 - Validate Go + rclone library licensing alignment (rclone is MIT; ensure compliance).
 - Prototype core daemon skeleton with one provider (S3) to verify mount performance.
+- Complete the `librclone` vs. RPC orchestration spike (TCK-009) and log the outcome in `/docs/decisions/`.
 - Design protobuf/gRPC contracts and generate stubs.
 - Draft UX wireframes for Web UI and CLI flows.
 - Set up CI pipeline skeleton (lint, tests, cross-build) and container packaging.

@@ -13,7 +13,7 @@ Date: 2025-10-06
 
 ---
 
-## Milestone M0 – Foundations (2 weeks)
+## Milestone M0 – Foundations (3 weeks)
 
 ### TCK-001 · F · P1 · 5 pts
 
@@ -25,7 +25,6 @@ Date: 2025-10-06
   - `go mod init` completed with agreed module path.
   - Base folders committed with README placeholders.
   - `.editorconfig`, `.gitignore`, and license file added.
-- **Owner:** Lead Go engineer
 
 ### TCK-002 · T · P1 · 3 pts
 
@@ -109,21 +108,21 @@ Date: 2025-10-06
   - Decision recorded on bundling approach vs extension link.
 - **Owner:** Product/UX
 
+### TCK-009 · R · P1 · 5 pts
+
+**Title:** Evaluate librclone embedding feasibility
+
+- **Description:** Prototype direct librclone embedding via CGO to understand build, packaging, and telemetry implications relative to shelling out to the binary.
+- **Dependencies:** TCK-003
+- **Acceptance Criteria:**
+  - Minimal Go harness linking librclone builds and mounts a test remote on macOS and Linux.
+  - Pros/cons documented comparing embedded vs subprocess execution (performance, footprint, upgrade story).
+  - Decision log entry created with recommendation and next steps.
+- **Owner:** Lead Go engineer
+
 ---
 
-## Milestone M1 – Core Providers & Daemon (4 weeks)
-
-### TCK-101 · F · P1 · 13 pts
-
-**Title:** Implement FTP/SFTP connector
-
-- **Description:** Build connector supporting username/password and SSH key auth, passive mode, validation tests.
-- **Dependencies:** M0 completion, TCK-004, TCK-005
-- **Acceptance Criteria:**
-  - Connector passes integration tests against vsftpd container.
-  - CLI wizard prompts for credentials, stores in vault.
-  - Mount/unmount operations succeed with smoke test.
-- **Owner:** Cloud integrations engineer
+## Milestone M1 – Core Providers & Daemon (6 weeks)
 
 ### TCK-102 · F · P1 · 8 pts
 
@@ -135,18 +134,6 @@ Date: 2025-10-06
   - Integration tests using MinIO container.
   - Bucket listing, upload/download validated.
   - Support for environment credential fallback.
-- **Owner:** Cloud integrations engineer
-
-### TCK-103 · F · P1 · 8 pts
-
-**Title:** Implement Backblaze B2 connector
-
-- **Description:** Integrate application keys, large file upload resume, throughput tuning.
-- **Dependencies:** TCK-004, TCK-005, TCK-006
-- **Acceptance Criteria:**
-  - Integration tests using B2 sandbox or mock.
-  - Large file (>2GB) upload resume verified.
-  - Error retries with exponential backoff implemented.
 - **Owner:** Cloud integrations engineer
 
 ### TCK-104 · F · P1 · 8 pts
@@ -166,7 +153,7 @@ Date: 2025-10-06
 **Title:** Develop mount manager & FUSE integration layer
 
 - **Description:** Abstract platform-specific mounting via rclone VFS; manage lifecycle, retry policies.
-- **Dependencies:** TCK-003, TCK-005, connectors (TCK-101..TCK-104)
+- **Dependencies:** TCK-003, TCK-005, connectors (TCK-102, TCK-104)
 - **Acceptance Criteria:**
   - Mount manager API supports create/start/stop/status.
   - Linux/macOS integration tests pass in CI.
@@ -190,7 +177,7 @@ Date: 2025-10-06
 **Title:** Implement CLI workflows for config and mounts
 
 - **Description:** Interactive commands for `config create`, `mount add`, status listing, log tailing.
-- **Dependencies:** TCK-101..TCK-106
+- **Dependencies:** TCK-102, TCK-104, TCK-105, TCK-106
 - **Acceptance Criteria:**
   - CLI UX reviewed, supports JSON output.
   - `cloudmoor mount <name>` works end-to-end.
@@ -201,11 +188,11 @@ Date: 2025-10-06
 
 **Title:** Add integration test harness with Testcontainers
 
-- **Description:** Create Go test suite spinning up FTP, MinIO, WebDAV containers for regression coverage.
-- **Dependencies:** TCK-101..TCK-104
+- **Description:** Create Go test suite spinning up MinIO (S3) and WebDAV containers for regression coverage.
+- **Dependencies:** TCK-102, TCK-104
 - **Acceptance Criteria:**
   - CI job runs integration suite nightly.
-  - Tests validate mount lifecycle per connector.
+  - Tests validate mount lifecycle for S3/MinIO and WebDAV connectors.
   - Docs explain how to run locally.
 - **Owner:** QA/Automation
 
@@ -248,54 +235,6 @@ Date: 2025-10-06
   - Rate limit retries implemented.
 - **Owner:** Cloud integrations engineer
 
-### TCK-203 · F · P1 · 5 pts
-
-**Title:** Google Drive connector (OAuth & service account)
-
-- **Description:** Support OAuth client and service account auth, handle shared drives.
-- **Dependencies:** TCK-201
-- **Acceptance Criteria:**
-  - Integration tests cover both auth modes.
-  - Change detection sync verified.
-  - Scopes documented and minimal.
-- **Owner:** Cloud integrations engineer
-
-### TCK-204 · F · P1 · 5 pts
-
-**Title:** OneDrive connector (personal & business)
-
-- **Description:** Implement OneDrive graph API integration with tenant selection.
-- **Dependencies:** TCK-201
-- **Acceptance Criteria:**
-  - Device flow works for personal Microsoft account.
-  - Business tenant selection documented.
-  - Integration tests validate upload/download.
-- **Owner:** Cloud integrations engineer
-
-### TCK-205 · F · P1 · 5 pts
-
-**Title:** Box connector with JWT + OAuth
-
-- **Description:** Support enterprise JWT apps and standard OAuth; manage key rotation.
-- **Dependencies:** TCK-201
-- **Acceptance Criteria:**
-  - JWT auth path validated in integration test (mock or sandbox).
-  - Token refresh + rotation automated.
-  - Error handling for enterprise policies.
-- **Owner:** Cloud integrations engineer
-
-### TCK-206 · F · P1 · 5 pts
-
-**Title:** pCloud connector with OAuth
-
-- **Description:** Integrate pCloud API with folder selection, cache policies.
-- **Dependencies:** TCK-201
-- **Acceptance Criteria:**
-  - OAuth flow tested with sandbox account.
-  - Upload/download and metadata listing confirmed.
-  - Documentation for API key setup.
-- **Owner:** Cloud integrations engineer
-
 ### TCK-207 · F · P1 · 8 pts
 
 **Title:** Build Web UI foundation (React + Vite)
@@ -313,7 +252,7 @@ Date: 2025-10-06
 **Title:** Implement Web UI configuration wizard
 
 - **Description:** Multistep forms for provider setup, validation, credential entry, summary.
-- **Dependencies:** TCK-207, connectors (TCK-202..TCK-206)
+- **Dependencies:** TCK-207, TCK-202
 - **Acceptance Criteria:**
   - Wizard supports OAuth device initiation and completion.
   - Schema-driven forms render per provider.
@@ -334,18 +273,18 @@ Date: 2025-10-06
 
 ### TCK-210 · D · P2 · 3 pts
 
-**Title:** Update documentation with OAuth provider guides
+**Title:** Update documentation with launch provider guides
 
-- **Description:** Write guides for Dropbox, Google Drive, OneDrive, Box, pCloud setup.
-- **Dependencies:** TCK-202..TCK-206
+- **Description:** Write guides for Amazon S3/MinIO, WebDAV, and Dropbox setup.
+- **Dependencies:** TCK-102, TCK-104, TCK-202
 - **Acceptance Criteria:**
-  - `/docs/providers/*.md` created with step-by-step instructions.
-  - Screenshots or references for OAuth console configuration.
+  - `/docs/providers/*.md` created with step-by-step instructions for the three launch connectors.
+  - Screenshots or references for relevant console configuration (AWS, WebDAV preset, Dropbox OAuth).
 - **Owner:** Product/UX
 
 ---
 
-## Milestone M3 – Advanced Providers & UX (3 weeks)
+## Milestone M3 – Advanced Providers & UX (4 weeks)
 
 ### TCK-301 · F · P1 · 8 pts
 
@@ -420,7 +359,7 @@ Date: 2025-10-06
 
 ---
 
-## Milestone M4 – Hardening & Release (2 weeks)
+## Milestone M4 – Hardening & Release (3 weeks)
 
 ### TCK-401 · T · P1 · 5 pts
 
@@ -481,6 +420,88 @@ Date: 2025-10-06
   - Regression thresholds defined for future releases.
   - Findings reviewed with engineering team.
 - **Owner:** QA/Automation + DevOps/SRE
+
+---
+
+## Deferred Backlog – Post-v1 Connectors
+
+### TCK-101 · F · P2 · 13 pts
+
+**Title:** Implement FTP/SFTP connector _(Deferred)_
+
+- **Description:** Build connector supporting username/password and SSH key auth, passive mode, validation tests. Deferred until after launch to focus on the narrower beta scope.
+- **Status:** Deferred to post-v1 (plan §7.2).
+- **Dependencies:** TCK-004, TCK-005
+- **Acceptance Criteria:**
+  - Connector passes integration tests against vsftpd container.
+  - CLI wizard prompts for credentials, stores in vault.
+  - Mount/unmount operations succeed with smoke test.
+- **Owner:** Cloud integrations engineer
+
+### TCK-103 · F · P2 · 8 pts
+
+**Title:** Implement Backblaze B2 connector _(Deferred)_
+
+- **Description:** Integrate application keys, large file upload resume, throughput tuning. Deferred until post-v1 to keep launch footprint manageable.
+- **Status:** Deferred to post-v1 (plan §7.2).
+- **Dependencies:** TCK-004, TCK-005, TCK-006
+- **Acceptance Criteria:**
+  - Integration tests using B2 sandbox or mock.
+  - Large file (>2GB) upload resume verified.
+  - Error retries with exponential backoff implemented.
+- **Owner:** Cloud integrations engineer
+
+### TCK-203 · F · P2 · 5 pts
+
+**Title:** Google Drive connector _(Deferred)_
+
+- **Description:** Support OAuth client and service account auth, handle shared drives. Deferred until beta feedback confirms demand.
+- **Status:** Deferred to post-v1 (plan §7.2).
+- **Dependencies:** TCK-201
+- **Acceptance Criteria:**
+  - Integration tests cover both auth modes.
+  - Change detection sync verified.
+  - Scopes documented and minimal.
+- **Owner:** Cloud integrations engineer
+
+### TCK-204 · F · P2 · 5 pts
+
+**Title:** OneDrive connector _(Deferred)_
+
+- **Description:** Implement OneDrive Graph API integration with tenant selection. Deferred until after Dropbox learnings are incorporated.
+- **Status:** Deferred to post-v1 (plan §7.2).
+- **Dependencies:** TCK-201
+- **Acceptance Criteria:**
+  - Device flow works for personal Microsoft account.
+  - Business tenant selection documented.
+  - Integration tests validate upload/download.
+- **Owner:** Cloud integrations engineer
+
+### TCK-205 · F · P2 · 5 pts
+
+**Title:** Box connector _(Deferred)_
+
+- **Description:** Support enterprise JWT apps and standard OAuth; manage key rotation. Deferred to avoid overextending beta milestone.
+- **Status:** Deferred to post-v1 (plan §7.2).
+- **Dependencies:** TCK-201
+- **Acceptance Criteria:**
+  - JWT auth path validated in integration test (mock or sandbox).
+  - Token refresh + rotation automated.
+  - Error handling for enterprise policies documented.
+- **Owner:** Cloud integrations engineer
+
+### TCK-206 · F · P2 · 5 pts
+
+**Title:** pCloud connector _(Deferred)_
+
+- **Description:** Integrate pCloud API with folder selection and cache policies. Deferred until post-v1 once OAuth platform is hardened.
+- **Status:** Deferred to post-v1 (plan §7.2).
+- **Dependencies:** TCK-201
+- **Acceptance Criteria:**
+  - OAuth flow tested with sandbox account.
+  - Upload/download and metadata listing confirmed.
+  - Documentation for API key setup.
+- **Owner:** Cloud integrations engineer
 
 ---
 

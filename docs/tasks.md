@@ -8,7 +8,7 @@ Date: 2025-10-06
 - **Hint** lines offer quick-start guidance or reminders about tooling.
 - **Comment** lines capture dependencies, owners, and validation notes. Align comments with the governance rules in `plan.md#21`.
 
-## Milestone M0 – Foundations (2 weeks)
+## Milestone M0 – Foundations (3 weeks)
 
 - [ ] **Task M0.1 – Repository & Tooling Setup** _(Tickets: TCK-001, TCK-007)_
   - _Hint:_ Start from a clean working tree and scaffold directories before wiring CI.
@@ -102,33 +102,28 @@ Date: 2025-10-06
       - _Hint:_ Include release checklist updates referencing license requirements.
       - _Comment:_ Share decision log entry per governance section 21.
 
-## Milestone M1 – Core Providers & Daemon (4 weeks)
+- [ ] **Task M0.6 – Rclone integration spike** _(Tickets: TCK-009)_
+  - _Hint:_ Prototype direct librclone embedding to uncover CGO, packaging, and licensing risks.
+  - _Comment:_ Required before finalizing daemon mount strategy (plan §11) and unblocking TCK-105.
+  - [ ] **Subtask M0.6.1 – Evaluate librclone embedding**
+    - _Hint:_ Build minimal Go wrapper linking against librclone to mount a local filesystem in CI and on macOS.
+    - _Comment:_ Compare process-supervision trade-offs versus spawning the rclone binary.
+    - [ ] **Action:** Publish spike summary with recommendation in `/docs/decisions/` and link from plan §11.
+      - _Hint:_ Include dependency matrix, build flags, and debugging steps for each OS.
+      - _Comment:_ Present findings during M0 exit review to set expectation for M1 implementation work.
 
-- [ ] **Task M1.1 – Connector Implementations (Phase 1)** _(Tickets: TCK-101 → TCK-104)_
-  - _Hint:_ Implement connectors in parallel where possible but reuse common validation helpers.
-  - _Comment:_ Merge each connector behind feature flags until integration tests pass.
-  - [ ] **Subtask M1.1.1 – FTP/SFTP connector (TCK-101)**
-    - _Hint:_ Base implementation on rclone SFTP backend, ensuring passive mode toggle.
-    - _Comment:_ Requires vault availability and registry hooks from M0.
-    - [ ] **Action:** Support username/password and SSH key auth with vsftpd container tests.
-      - _Hint:_ Use Testcontainers to spin up vsftpd with seeded directories.
-      - _Comment:_ Document known SSH cipher constraints in provider guide.
-    - [ ] **Action:** Wire CLI wizard to capture credentials securely.
-      - _Hint:_ Offer JSON output for automation; reuse validation prompts across providers.
-      - _Comment:_ Add unit tests for wizard flows in headless mode.
-  - [ ] **Subtask M1.1.2 – Amazon S3/MinIO connector (TCK-102)**
+## Milestone M1 – Core Providers & Daemon (6 weeks)
+
+- [ ] **Task M1.1 – Connector Implementations (Launch set)** _(Tickets: TCK-102, TCK-104)_
+  - _Hint:_ Share validation helpers and CLI wizard flows between S3/MinIO and WebDAV to minimize duplicate work.
+  - _Comment:_ Merge each connector behind feature flags; FTP/SFTP (TCK-101) and Backblaze B2 (TCK-103) moved to deferred backlog.
+  - [ ] **Subtask M1.1.1 – Amazon S3/MinIO connector (TCK-102)**
     - _Hint:_ Abstract credential chain to support env vars, IAM roles, and static keys.
     - _Comment:_ Validate with MinIO integration test part of CI nightly run.
     - [ ] **Action:** Implement multipart upload tuning and default cache policies.
       - _Hint:_ Expose cache configuration via provider metadata for Web UI.
       - _Comment:_ Track throughput metrics to inform benchmarks later.
-  - [ ] **Subtask M1.1.3 – Backblaze B2 connector (TCK-103)**
-    - _Hint:_ Mock large file uploads locally if sandbox unavailable; ensure resume logic.
-    - _Comment:_ Coordinate with QA to capture rate-limit scenarios.
-    - [ ] **Action:** Implement exponential backoff and resume for >2GB uploads.
-      - _Hint:_ Store upload state in cache DB to survive restarts.
-      - _Comment:_ Add metrics for retry counts.
-  - [ ] **Subtask M1.1.4 – WebDAV connector (TCK-104)**
+  - [ ] **Subtask M1.1.2 – WebDAV connector (TCK-104)**
     - _Hint:_ Provide presets for Nextcloud/SharePoint to reduce user error.
     - _Comment:_ Document certificate handling options clearly.
     - [ ] **Action:** Validate connector against local WebDAV container with TLS toggle tests.
@@ -189,9 +184,9 @@ Date: 2025-10-06
   - [ ] **Subtask M1.5.1 – Stand up regression harness**
     - _Hint:_ Provide make targets (`make test-integration`) to launch containers locally.
     - _Comment:_ Document required Docker resources to avoid CI failures.
-    - [ ] **Action:** Automate container lifecycle and add sample tests for each core connector.
-      - _Hint:_ Employ context timeouts to prevent hanging tests.
-      - _Comment:_ Publish how-to guide in `/docs/testing/integration.md`.
+  - [ ] **Action:** Automate container lifecycle and add sample tests for each launch connector (S3/MinIO, WebDAV).
+    - _Hint:_ Employ context timeouts to prevent hanging tests.
+    - _Comment:_ Publish how-to guide in `/docs/testing/integration.md`.
 
 ## Milestone M2 – OAuth Providers & Web UI (4 weeks)
 
@@ -211,39 +206,15 @@ Date: 2025-10-06
       - _Hint:_ Secure endpoints via short-lived tokens to prevent reuse.
       - _Comment:_ Sync API reference with OpenAPI spec.
 
-- [ ] **Task M2.2 – Connector Implementations (Phase 2)** _(Tickets: TCK-202 → TCK-206)_
-  - _Hint:_ Reuse OAuth scaffolding across providers to reduce duplication.
-  - _Comment:_ Validate rate limiting and quota handling per provider.
+- [ ] **Task M2.2 – Dropbox Connector & OAuth Hardening** _(Tickets: TCK-202)_
+  - _Hint:_ Reuse the shared OAuth service to minimize bespoke Dropbox logic; lean on caching helpers from M1.
+  - _Comment:_ Google Drive, OneDrive, Box, and pCloud connectors are deferred to the backlog.
   - [ ] **Subtask M2.2.1 – Dropbox connector (TCK-202)**
     - _Hint:_ Use incremental sync endpoints for efficiency.
     - _Comment:_ Capture refresh token storage process in provider docs.
     - [ ] **Action:** Complete OAuth flow in CLI & Web UI with retry/backoff.
       - _Hint:_ Mock Dropbox API via `httptest` to avoid flakiness.
       - _Comment:_ Add acceptance tests ensuring metadata caching works.
-  - [ ] **Subtask M2.2.2 – Google Drive connector (TCK-203)**
-    - _Hint:_ Implement service-account impersonation path for enterprises.
-    - _Comment:_ Manage Drive change tokens to minimize API calls.
-    - [ ] **Action:** Validate shared drive support with integration tests.
-      - _Hint:_ Use Google-provided test data set where possible.
-      - _Comment:_ Document prerequisites (client secrets JSON) in provider guide.
-  - [ ] **Subtask M2.2.3 – OneDrive connector (TCK-204)**
-    - _Hint:_ Support both personal and business endpoints via config flag.
-    - _Comment:_ Map Graph API throttling headers to retry schedule.
-    - [ ] **Action:** Add tests covering tenant selection and file operations.
-      - _Hint:_ Provide sample tenant config JSON for QA team.
-      - _Comment:_ Capture known limitations (e.g., SharePoint site support) in docs.
-  - [ ] **Subtask M2.2.4 – Box connector (TCK-205)**
-    - _Hint:_ Use JWT app config for enterprise integration; secure private key storage.
-    - _Comment:_ Validate token rotation logic with unit tests.
-    - [ ] **Action:** Implement file operations with policy-aware error handling.
-      - _Hint:_ Surface admin consent instructions in UI wizard.
-      - _Comment:_ Add audit logging for Box-specific retention policies.
-  - [ ] **Subtask M2.2.5 – pCloud connector (TCK-206)**
-    - _Hint:_ Provide folder picker UI to limit scope.
-    - _Comment:_ Document API rate limits since pCloud quotas differ.
-    - [ ] **Action:** Validate upload/download flows and metadata listing.
-      - _Hint:_ Include offline cache scenario in tests.
-      - _Comment:_ Ensure connector handles 2FA-enabled accounts gracefully.
 
 - [ ] **Task M2.3 – Web UI Experience (Phase 1)** _(Tickets: TCK-207, TCK-208)_
   - _Hint:_ Treat Web UI as SPA served by daemon; support local dev via Vite proxy.
@@ -289,11 +260,11 @@ Date: 2025-10-06
   - [ ] **Subtask M2.5.1 – Provider setup guides**
     - _Hint:_ Maintain consistent structure (prerequisites, steps, troubleshooting).
     - _Comment:_ Pair review with Product/UX for clarity and localization readiness.
-    - [ ] **Action:** Publish guides for Dropbox, Google Drive, OneDrive, Box, pCloud under `/docs/providers/`.
-      - _Hint:_ Use relative image paths to keep repo portable.
-      - _Comment:_ Link each guide from Web UI tooltips/help menu.
+  - [ ] **Action:** Publish guides for Amazon S3/MinIO, WebDAV, and Dropbox under `/docs/providers/`.
+    - _Hint:_ Use relative image paths to keep repo portable.
+    - _Comment:_ Link each guide from Web UI tooltips/help menu.
 
-## Milestone M3 – Advanced Providers & UX (3 weeks)
+## Milestone M3 – Advanced Providers & UX (4 weeks)
 
 - [ ] **Task M3.1 – Mega Connector & Security Enhancements** _(Tickets: TCK-301)_
   - _Hint:_ Reference Mega SDK docs for cryptography specifics.
@@ -388,7 +359,7 @@ Date: 2025-10-06
       - _Hint:_ Add diagrams/flowcharts for complex procedures.
       - _Comment:_ Review with support leads prior to release.
 
-## Milestone M4 – Hardening & Release (2 weeks)
+## Milestone M4 – Hardening & Release (3 weeks)
 
 - [ ] **Task M4.1 – Security & Compliance** _(Tickets: TCK-401)_
   - _Hint:_ Integrate security scanning into CI early in the milestone.
@@ -447,6 +418,53 @@ Date: 2025-10-06
     - [ ] **Action:** Produce `/docs/performance.md` with charts/tables summarizing results.
       - _Hint:_ Use lightweight charting library (e.g., Mermaid or embedded images).
       - _Comment:_ Record benchmark configuration in appendix for repeatability.
+
+## Deferred Connector Tasks (Post-v1)
+
+- [ ] **Task D.1 – FTP/SFTP connector (TCK-101)** _(Deferred)_
+  - _Hint:_ Base implementation on rclone SFTP backend, ensuring passive mode toggle.
+  - _Comment:_ Target after launch once vault and registry patterns are validated in production.
+  - [ ] **Action:** Support username/password and SSH key auth with vsftpd container tests.
+    - _Hint:_ Use Testcontainers to spin up vsftpd with seeded directories.
+    - _Comment:_ Document known SSH cipher constraints in provider guide.
+  - [ ] **Action:** Wire CLI wizard to capture credentials securely.
+    - _Hint:_ Offer JSON output for automation; reuse validation prompts across providers.
+    - _Comment:_ Add unit tests for wizard flows in headless mode.
+
+- [ ] **Task D.2 – Backblaze B2 connector (TCK-103)** _(Deferred)_
+  - _Hint:_ Mock large file uploads locally if sandbox unavailable; ensure resume logic.
+  - _Comment:_ Schedule once sustained bandwidth benchmarks complete for S3/MinIO.
+  - [ ] **Action:** Implement exponential backoff and resume for >2GB uploads.
+    - _Hint:_ Store upload state in cache DB to survive restarts.
+    - _Comment:_ Add metrics for retry counts.
+
+- [ ] **Task D.3 – Google Drive connector (TCK-203)** _(Deferred)_
+  - _Hint:_ Implement service-account impersonation path for enterprises.
+  - _Comment:_ Reassess priority based on customer demand after beta feedback.
+  - [ ] **Action:** Validate shared drive support with integration tests.
+    - _Hint:_ Use Google-provided test data set where possible.
+    - _Comment:_ Document prerequisites (client secrets JSON) in provider guide.
+
+- [ ] **Task D.4 – OneDrive connector (TCK-204)** _(Deferred)_
+  - _Hint:_ Support both personal and business endpoints via config flag.
+  - _Comment:_ Track Graph API throttling learnings from Dropbox rollout before revisiting.
+  - [ ] **Action:** Add tests covering tenant selection and file operations.
+    - _Hint:_ Provide sample tenant config JSON for QA team.
+    - _Comment:_ Capture known limitations (e.g., SharePoint site support) in docs.
+
+- [ ] **Task D.5 – Box connector (TCK-205)** _(Deferred)_
+  - _Hint:_ Use JWT app config for enterprise integration; secure private key storage.
+  - _Comment:_ Revisit alongside enterprise feedback on governance requirements.
+  - [ ] **Action:** Implement file operations with policy-aware error handling.
+    - _Hint:_ Surface admin consent instructions in UI wizard.
+    - _Comment:_ Add audit logging for Box-specific retention policies.
+
+- [ ] **Task D.6 – pCloud connector (TCK-206)** _(Deferred)_
+  - _Hint:_ Provide folder picker UI to limit scope.
+  - _Comment:_ Evaluate after Dropbox customer onboarding to understand OAuth coverage.
+  - [ ] **Action:** Validate upload/download flows and metadata listing.
+    - _Hint:_ Include offline cache scenario in tests.
+    - _Comment:_ Ensure connector handles 2FA-enabled accounts gracefully.
 
 ## Cross-Cutting Backlog (Post-M4 or As Capacity Allows)
 
