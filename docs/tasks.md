@@ -62,30 +62,35 @@ Date: 2025-10-06
 - [ ] **Task M0.3 – Core Domain Abstractions** _(Tickets: TCK-003, TCK-004, TCK-005)_
   - _Hint:_ Design interfaces and persistence schema together to avoid churn.
   - _Comment:_ Coordinate with integrations engineer to validate connector API surface.
-  - [ ] **Subtask M0.3.1 – Define connector interfaces**
+  - [x] **Subtask M0.3.1 – Define connector interfaces**
     - _Hint:_ Capture lifecycle hooks (Init, Validate, Mount, Teardown) and metadata (schema, display name).
     - _Comment:_ Keep surface minimal; future providers should not require interface changes.
-    - [ ] **Action:** Implement connector registry loader with unit tests ensuring deterministic ordering.
+    - [x] **Action:** Implement connector registry loader with unit tests ensuring deterministic ordering.
       - _Hint:_ Use build tags or plugin metadata structs for compile-time registration.
       - _Comment:_ Store registry manifest in JSON to support Web UI discovery.
-      - _Plan:_
-        - Define `internal/connectors` package with `Connector` interface (`Init`, `ValidateConfig`, `Open`, `Close`) plus supporting types for provider metadata and mount context.
-        - Implement a registry that registers providers via `func RegisterProvider(desc ProviderDescriptor)` and preserves deterministic ordering via slice of keys + map for lookups.
-        - Generate JSON manifest from registry entries (for future Web UI) and expose helper to return stable, alphabetized list.
-        - Author table-driven unit tests that register fake providers, assert deterministic ordering, and guard against duplicate IDs.
-        - Add doc comments/Godoc examples so downstream teams understand interface expectations.
-  - [ ] **Subtask M0.3.2 – Implement credential vault MVP**
+      - _Completed:_
+        - ✅ Defined `internal/connectors` package with `Connector` interface (`Init`, `ValidateConfig`, `Open`, `Metadata`) and `Connection` interface (`Ping`, `ProviderID`, `Close`).
+        - ✅ Implemented `Config` type (map[string]interface{}) with `GetString` and `GetBool` helper methods for type-safe access.
+        - ✅ Created thread-safe registry with `RegisterProvider`, `GetProvider`, `ListProviders` (preserves registration order), `ProviderIDs` (alphabetical), and `ExportManifest` (JSON serialization).
+        - ✅ Authored comprehensive table-driven unit tests covering successful registration, duplicate ID panics, empty ID validation, deterministic ordering, alphabetical ID sorting, JSON manifest generation, and config helpers.
+        - ✅ Added testify dependency and verified all tests pass (go test ./... succeeds).
+        - ✅ Removed `internal/placeholder` package now that real code exists.
+  - [x] **Subtask M0.3.2 – Implement credential vault MVP**
     - _Hint:_ Leverage `crypto/aes` with envelope encryption and rotate master key via CLI.
     - _Comment:_ Provide secret abstraction that can swap to external stores later.
-    - [ ] **Action:** Add CRUD API and CLI command `cloudmoor config vault test` with unit coverage.
+    - [x] **Action:** Add CRUD API and CLI command `cloudmoor config vault test` with unit coverage.
       - _Hint:_ Mock key ring during tests to avoid persisting secrets on disk.
       - _Comment:_ Emit structured audit logs on secret access.
-      - _Plan:_
-        - Create `internal/vault` package exposing `Store` interface with methods for `Put`, `Get`, `Delete`, `List`, and `HealthCheck` plus structured audit hooks.
-        - Implement AES-GCM envelope encryption using a master key sourced via pluggable `KeyProvider` (initial provider uses filesystem key sealed by user-supplied passphrase or OS keychain stub).
-        - Add in-memory key provider for tests and a file-based provider for the MVP; ensure design allows future external secret stores.
-        - Build CLI command `cloudmoor config vault test` under `cmd/cloudmoor` that exercises round-trip encrypt/decrypt and prints audit info; scaffold logging to use shared zap logger.
-        - Write unit tests covering encryption round trips, key rotation flow, and audit emission using testify and deterministic fixtures.
+      - _Completed:_
+        - ✅ Created `internal/vault` package with `Store` interface defining `Put`, `Get`, `Delete`, `List`, and `HealthCheck` methods.
+        - ✅ Defined `AuditEvent` struct and `AuditHook` function type for structured audit logging with timestamps, operation names, success flags, and metadata.
+        - ✅ Implemented `KeyProvider` interface with `GetKey`, `RotateKey`, and `HealthCheck` methods to support pluggable key backends.
+        - ✅ Built `aesgcmStore` implementing AES-256-GCM envelope encryption with thread-safe in-memory storage.
+        - ✅ Created `InMemoryKeyProvider` for testing (generates random 32-byte keys) and `FileKeyProvider` for MVP (persists keys to disk with 0600 permissions).
+        - ✅ Implemented comprehensive unit tests covering: round-trip encryption/decryption, empty key/value validation, not-found errors, list operations with sorting, health checks, key rotation, audit hook invocation, and GCM tampering detection.
+        - ✅ Built Cobra-based CLI with `cloudmoor config vault test` command that performs all CRUD operations, validates results, and prints structured audit log in JSON format.
+        - ✅ Added Cobra dependency; CLI successfully builds and executes all vault tests.
+        - ✅ Verified all tests pass (go test ./... succeeds for connectors and vault packages).
   - [ ] **Subtask M0.3.3 – Create configuration persistence layer**
     - _Hint:_ Use `golang-migrate` for forward-only migrations and keep schema diagram in docs.
     - _Comment:_ Ensure `mounts` table stores semantic version for change detection.
