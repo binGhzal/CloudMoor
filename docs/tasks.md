@@ -15,10 +15,10 @@ Date: 2025-10-06
 - [ ] **Task M0.1 – Repository & Tooling Setup** _(Tickets: TCK-001, TCK-007)_
   - _Hint:_ Start from a clean working tree and scaffold directories before wiring CI.
   - _Comment:_ Blocks every downstream engineering task; target completion in week 1.
-  - [ ] **Subtask M0.1.1 – Initialize repository scaffold**
+  - [x] **Subtask M0.1.1 – Initialize repository scaffold**
     - _Hint:_ Run `go mod init github.com/binGhzal/cloudmoor` and commit baseline folders (`cmd/`, `internal/`, `pkg/`, `web/`, `deploy/`).
     - _Comment:_ Ensure module path matches release namespace to avoid future import churn.
-    - [ ] **Action:** Commit `.editorconfig`, `.gitignore`, LICENSE, and placeholder READMEs for each top-level directory.
+  - [x] **Action:** Commit `.editorconfig`, `.gitignore`, LICENSE, and placeholder READMEs for each top-level directory.
       - _Hint:_ Mirror formatting settings from Golang + frontend conventions to reduce lint noise.
       - _Comment:_ Link README stubs to `plan.md` for traceability.
   - [ ] **Subtask M0.1.2 – Establish contribution standards**

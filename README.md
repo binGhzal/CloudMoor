@@ -63,11 +63,17 @@ Refer to [`docs/plan.md`](docs/plan.md) for the full architecture deep dive, com
 
 | Path            | Purpose                                                                           |
 | --------------- | --------------------------------------------------------------------------------- |
-| `docs/plan.md`  | Strategic product/architecture plan and assumptions.                              |
-| `docs/tasks.md` | Unified execution checklist plus detailed ticket backlog and acceptance criteria. |
-| `.github/`      | GitHub workflow and issue template placeholders (coming soon).                    |
+| `cmd/`          | Go `main` packages for executables (`cloudmoor`, `cloudmoord`, supporting tools). |
+| `internal/`     | Core domain packages (mount manager, connectors, vault, persistence, services).   |
+| `pkg/`          | Intentional public Go packages for limited external reuse.                        |
+| `web/`          | React + Vite console application scaffold.                                        |
+| `deploy/`       | Packaging artefacts (Docker, Helm, installers, IaC).                              |
+| `docs/`         | Strategic plan, specs, backlog, and operational runbooks.                         |
+| `.editorconfig` | Shared formatting rules for Go, TypeScript, Markdown, and Makefiles.              |
+| `.gitignore`    | Ignore rules covering Go builds, frontend artefacts, tooling caches, and secrets. |
+| `LICENSE`       | Project licensing (MIT).                                                          |
 
-Additional directories (e.g., `cmd/`, `internal/`, `web/`, `deploy/`) will arrive during Milestone M0 as scaffolding work progresses.
+Refer to [`docs/spec.md`](docs/spec.md#31-top-level-folders) for detailed layout conventions and update this table as new folders land.
 
 ## Getting Started
 
@@ -191,7 +197,7 @@ CloudMoor follows the delivery governance process described in [`docs/plan.md#21
 
 ## License
 
-License selection is underway as part of Task M0.1.1. The default intention is to adopt an MIT-compatible license aligned with rclone’s requirements. A dedicated `LICENSE` file will be added before the first tagged release.
+CloudMoor is released under the [MIT License](LICENSE), aligning with rclone’s permissive requirements while enabling broad community adoption.
 
 ## Acknowledgements
 

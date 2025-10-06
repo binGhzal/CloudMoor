@@ -1,1 +1,36 @@
+# Go build artifacts
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage/
+
+# Go tooling caches
+*.sum
+
+# Node/Frontend
+node_modules/
+web/node_modules/
+dist/
+web/dist/
+.vite/
+
+# Build outputs
+build/
+.deploy/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Environment files
+.env
+.env.*
+
+# Editors & OS
 .DS_Store
+.idea/
+.vscode/
